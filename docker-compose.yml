@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  futu-grid-trading:
+    image: futu-grid-trading
+    build: .
+    network_mode: "host"
+    container_name: futu-grid-trading
+    environment: 
+      - PWD_UNLOCK=$PWD_UNLOCK
+    volumes:
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+      - ./vol:/vol
+    command: python3 main.py -c /vol/config/prod.config.yml

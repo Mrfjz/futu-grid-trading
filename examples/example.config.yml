@@ -1,0 +1,9 @@
+logging:
+  log_file: vol/log/futu-grid-trading.log
+  log_level: DEBUG
+grid_trading_strategy:
+  grid_upper_limit_price: 5.6
+  grid_lower_limit_price: 3.6
+  grid_count: 10
+  grid_lower_limit_position: 10000
+  inverse_equity_max_position: 10000
