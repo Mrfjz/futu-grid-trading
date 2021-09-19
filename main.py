@@ -5,8 +5,8 @@ import re
 from time import sleep
 
 import yaml
-from lib.api import *
-from lib.strategy import GridTradingStrategy
+from trade.api import *
+from trade.strategy import GridTradingStrategy
 
 logger = logging.getLogger("futu-trade")
 

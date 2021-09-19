@@ -1,4 +1,4 @@
-from lib.strategy import GridTradingStrategy
+from trade.strategy import GridTradingStrategy
 
 
 def test_position_per_grid():

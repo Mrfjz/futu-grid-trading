@@ -1,5 +1,5 @@
 from datetime import datetime
-from lib.api import *
+from trade.api import *
 
 
 def test_get_price():
