@@ -8,7 +8,7 @@ import yaml
 from trade.api import *
 from trade.strategy import GridTradingStrategy
 
-logger = logging.getLogger("futu-trade")
+logger = logging.getLogger("futu-grid-trading")
 
 FORMATTER = logging.Formatter(
     '%(asctime)s.%(msecs)03d %(name)s %(levelname)s %(filename)s:%(lineno)d %(funcName)s(): %(message)s',
