@@ -73,22 +73,28 @@ def main(args):
                 logger.info(f"Placing sell market order, symbol={SYMBOL}, quantity={abs(order_quantity)}")
                 if not dry_run:
                     place_sell_market_order(SYMBOL, abs(order_quantity))
+                    logger.info("Order placed")
+
             if inverse_equity_order_quantity < 0:
                 logger.info(f"Placing sell market order, symbol={INVERSE_EQUITY_SYMBOL}, "
                             f"quantity={abs(inverse_equity_order_quantity)}")
                 if not dry_run:
                     place_sell_market_order(INVERSE_EQUITY_SYMBOL, abs(inverse_equity_order_quantity))
+                    logger.info("Order placed")
 
             # place buy market order
             if order_quantity > 0:
                 logger.info(f"Placing buy market order, symbol={SYMBOL}, quantity={abs(order_quantity)}")
                 if not dry_run:
                     place_buy_market_order(SYMBOL, abs(order_quantity))
+                    logger.info("Order placed")
+
             if inverse_equity_order_quantity > 0:
                 logger.info(f"Placing buy market order, symbol={INVERSE_EQUITY_SYMBOL}, "
                             f"quantity={abs(inverse_equity_order_quantity)}")
                 if not dry_run:
                     place_buy_market_order(INVERSE_EQUITY_SYMBOL, abs(inverse_equity_order_quantity))
+                    logger.info("Order placed")
         else:
             logger.debug("Market is not open")
 
