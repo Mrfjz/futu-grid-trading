@@ -57,7 +57,6 @@ def main(args):
     while 1:
         if check_market_open():
             _, price = get_latest_price(SYMBOL)
-            price = 4.41
             position = get_position(SYMBOL)
             inverse_equity_position = get_position(INVERSE_EQUITY_SYMBOL)
 
