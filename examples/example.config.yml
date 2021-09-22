@@ -1,5 +1,5 @@
 logging:
-  log_file: vol/log/futu-grid-trading.log
+  log_file: /vol/log/futu-grid-trading.log
   log_level: DEBUG
 grid_trading_strategy:
   grid_upper_limit_price: 5.6
