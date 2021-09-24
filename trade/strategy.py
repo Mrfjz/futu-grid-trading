@@ -86,7 +86,7 @@ class GridTradingStrategy:
         else:
             new_position = position
 
-        order_quantity = new_position - position
+        order_quantity = int(new_position - position)
 
         logger.debug(f"grid_index={grid_index}, min_grid_position={min_grid_position}, "
                      f"max_grid_position={max_grid_position}, new_position={new_position}, "
@@ -94,7 +94,7 @@ class GridTradingStrategy:
 
         inverse_equity_grid_index = (self.grid_count - new_position / self.position_per_grid)
         inverse_equity_new_position = inverse_equity_grid_index * self.inverse_equity_position_per_grid
-        inverse_equity_order_quantity = inverse_equity_new_position - inverse_equity_position
+        inverse_equity_order_quantity = int(inverse_equity_new_position - inverse_equity_position)
 
         logger.debug(f"inverse_equity_grid_index={inverse_equity_grid_index}, "
                      f"inverse_equity_new_position={inverse_equity_new_position}, "

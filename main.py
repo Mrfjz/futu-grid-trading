@@ -15,7 +15,9 @@ FORMATTER = logging.Formatter(
     '%d %b %Y %H:%M:%S')
 
 SYMBOL = "HK.07226"
+PRICE_ADJUST = 0.02
 INVERSE_EQUITY_SYMBOL = "HK.07552"
+INVERSE_EQUITY_PRICE_ADJUST = 0.05
 
 
 def get_args():
@@ -45,6 +47,28 @@ def configure_logger(log_file, log_level="INFO"):
     logger.addHandler(file_handler)
 
 
+def wait_order_filled_all(order_id, timeout=10):
+    """
+    Wait for the order to be filled all
+
+    :param order_id:
+    :type order_id: str
+    :param timeout:
+    :type timeout: float
+    :return:
+    :rtype: bool
+    """
+    sleep(1)
+    if check_order_filled_all(order_id):
+        return True
+
+    sleep(timeout)
+    if check_order_filled_all(order_id):
+        return True
+    else:
+        raise TimeoutError(f"Order '{order_id}' is not filled all after {timeout} seconds")
+
+
 def main(args):
     dry_run = args['dry_run']
     with open(args['config']) as f:
@@ -55,9 +79,10 @@ def main(args):
     logger.info("Futu-grid-trading started")
 
     while 1:
-        if check_market_open():
+        if check_market_open() and check_all_submitted_order_filled_all():
             _, price = get_latest_price(SYMBOL)
             position = get_position(SYMBOL)
+            _, inverse_equity_price = get_latest_price(INVERSE_EQUITY_SYMBOL)
             inverse_equity_position = get_position(INVERSE_EQUITY_SYMBOL)
 
             order_quantity, inverse_equity_order_quantity = strategy.cal_order_quantity(price, position,
@@ -68,33 +93,45 @@ def main(args):
                          f"order_quantity={order_quantity}, "
                          f"inverse_equity_order_quantity={inverse_equity_order_quantity}")
 
-            # place sell market order
+            # place sell order
             if order_quantity < 0:
-                logger.info(f"Placing sell market order, symbol={SYMBOL}, quantity={abs(order_quantity)}")
+                order_price = price - PRICE_ADJUST
+                logger.info(f"Placing sell market order, symbol={SYMBOL}, quantity={abs(order_quantity)}, "
+                            f"order_price={order_price}")
                 if not dry_run:
-                    place_sell_market_order(SYMBOL, abs(order_quantity))
+                    order_id = place_sell_normal_order(SYMBOL, abs(order_quantity), order_price)
                     logger.info("Order placed")
+                    wait_order_filled_all(order_id)
 
             if inverse_equity_order_quantity < 0:
+                order_price = inverse_equity_price - INVERSE_EQUITY_PRICE_ADJUST
                 logger.info(f"Placing sell market order, symbol={INVERSE_EQUITY_SYMBOL}, "
-                            f"quantity={abs(inverse_equity_order_quantity)}")
+                            f"quantity={abs(inverse_equity_order_quantity)}, order_price={order_price}")
                 if not dry_run:
-                    place_sell_market_order(INVERSE_EQUITY_SYMBOL, abs(inverse_equity_order_quantity))
+                    order_id = place_sell_normal_order(INVERSE_EQUITY_SYMBOL, abs(inverse_equity_order_quantity),
+                                                       order_price)
                     logger.info("Order placed")
+                    wait_order_filled_all(order_id)
 
-            # place buy market order
+            # place buy order
             if order_quantity > 0:
-                logger.info(f"Placing buy market order, symbol={SYMBOL}, quantity={abs(order_quantity)}")
+                order_price = price + PRICE_ADJUST
+                logger.info(f"Placing buy market order, symbol={SYMBOL}, quantity={abs(order_quantity)} "
+                            f"order_price={order_price}")
                 if not dry_run:
-                    place_buy_market_order(SYMBOL, abs(order_quantity))
+                    order_id = place_buy_normal_order(SYMBOL, abs(order_quantity), order_price)
                     logger.info("Order placed")
+                    wait_order_filled_all(order_id)
 
             if inverse_equity_order_quantity > 0:
+                order_price = inverse_equity_price + INVERSE_EQUITY_PRICE_ADJUST
                 logger.info(f"Placing buy market order, symbol={INVERSE_EQUITY_SYMBOL}, "
-                            f"quantity={abs(inverse_equity_order_quantity)}")
+                            f"quantity={abs(inverse_equity_order_quantity)}, order_price={order_price}")
                 if not dry_run:
-                    place_buy_market_order(INVERSE_EQUITY_SYMBOL, abs(inverse_equity_order_quantity))
+                    order_id = place_buy_normal_order(INVERSE_EQUITY_SYMBOL, abs(inverse_equity_order_quantity),
+                                                      order_price)
                     logger.info("Order placed")
+                    wait_order_filled_all(order_id)
         else:
             logger.debug("Market is not open")
 

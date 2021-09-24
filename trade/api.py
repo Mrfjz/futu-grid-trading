@@ -1,4 +1,3 @@
-from pathlib import Path
 import os
 from datetime import datetime
 
@@ -108,3 +107,81 @@ def place_sell_market_order(symbol, quantity):
         return True
     else:
         raise ValueError("Unable to place sell market order, error={}".format(data))
+
+
+def place_buy_normal_order(symbol, quantity, price):
+    """
+    Place a buy market order
+
+    :param symbol: a single stock stick, e.g. 'HK.07266'
+    :type symbol: str
+    :param quantity: the amount of the shares you want to buy
+    :type quantity: int
+    :param price: the order price
+    :type price: float
+    :return: order id
+    :rtype: str
+    """
+    assert quantity > 0, "Expect quantity to be a positive integer but got {}".format(quantity)
+    ret, data = trd_ctx.place_order(price=price, qty=quantity, code=symbol, trd_side=TrdSide.BUY,
+                                    order_type=OrderType.NORMAL)
+    if ret == RET_OK:
+        return data['order_id'][0]
+    else:
+        raise ValueError("Unable to place buy normal order, error={}".format(data))
+
+
+def place_sell_normal_order(symbol, quantity, price):
+    """
+    Place a sell market order
+
+    :param symbol: a single stock stick, e.g. 'HK.07266'
+    :type symbol: str
+    :param quantity: the amount of the shares you want to sell
+    :type quantity: int
+    :param price: the order price
+    :type price: float
+    :return: order id
+    :rtype: str
+    """
+    assert quantity > 0, "Expect quantity to be a positive integer but got {}".format(quantity)
+    ret, data = trd_ctx.place_order(price=price, qty=quantity, code=symbol, trd_side=TrdSide.SELL,
+                                    order_type=OrderType.NORMAL)
+    if ret == RET_OK:
+        return data['order_id'][0]
+    else:
+        raise ValueError("Unable to place sell normal order, error={}".format(data))
+
+
+def check_order_filled_all(order_id):
+    """
+    Check if given order filled all
+
+    :param order_id:
+    :type order_id: str
+    :return:
+    :rtype: bool
+    """
+    ret, data = trd_ctx.order_list_query(order_id=order_id)
+    if ret != RET_OK:
+        raise ValueError("Unable to get order status, error={}".format(data))
+
+    if data.empty:
+        raise ValueError("Order '{}' not found".format(order_id))
+
+    return str(data['order_status'][0]) == "FILLED_ALL"
+
+
+def check_all_submitted_order_filled_all():
+    """
+    Check if all the submitted order filled all, i.e. all the trade is done.
+
+    :return:
+    :rtype: bool
+    """
+    ret, data = trd_ctx.order_list_query(
+        status_filter_list=["WAITING_SUBMIT", "SUBMITTING", "SUBMITTED", "FILLED_PART"])
+    if ret != RET_OK:
+        raise ValueError("Unable to get submitted orders, error={}".format(data))
+
+    return data.empty
