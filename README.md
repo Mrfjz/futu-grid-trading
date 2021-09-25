@@ -17,12 +17,12 @@ docker-compose run futu-grid-trading python3 /opt/futu-grid-trading/bin/test_con
 
 Create and customize your own production config file
 ```
-cp examples/example.config.yml vol/config/prod.config.yml
+cp examples/example.config.yml vol/prod.config.yml
 ```
 
-Set PWD_UNLOCK in environment variable
+Create and customize .env file
 ```
-echo 'PWD_UNLOCK=YOUR_PWD_UNLOCK' > .env
+cp examples/example.env .env
 ```
 
 Start the service
@@ -32,5 +32,5 @@ docker-compose up -d
 
 Check the log file
 ```
-tail -f vol/log/futu-grid-trading.log
+tail -f ./vol/log/futu-grid-trading.log
 ```

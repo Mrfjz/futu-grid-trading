@@ -7,8 +7,11 @@ services:
     container_name: futu-grid-trading
     environment: 
       - PWD_UNLOCK=$PWD_UNLOCK
+      - LOG_LEVEL=$LOG_LEVEL
+      - DRY_RUN=$DRY_RUN
     volumes:
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
-      - ./vol:/vol
-    command: python3 main.py -c /vol/config/prod.config.yml
+      - ./vol/log:/var/log/futu-grid-trading
+      - ./vol/prod.config.yml:/vol/prod.config.yml
+    command: python3 /opt/futu-grid-trading/main.py -c /vol/prod.config.yml
