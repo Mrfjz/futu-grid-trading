@@ -44,7 +44,7 @@ def configure_logger():
     logger.addHandler(file_handler)
 
 
-def wait_order_filled_all(order_id, timeout=10):
+def wait_order_filled_all(order_id, timeout=30):
     """
     Wait for the order to be filled all
 
