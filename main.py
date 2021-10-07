@@ -134,11 +134,15 @@ def main(args):
 
             # place sell order for equity
             if order_quantity < 0:
-                place_order(SYMBOL, abs(order_quantity), price, PRICE_ADJUST, "SELL")
+                logger.info(f"Placing sell market order, symbol={SYMBOL}, quantity={abs(order_quantity)}")
+                place_sell_market_order(SYMBOL, abs(order_quantity))
+                logger.info("Order placed")
 
             # place sell order for inverse equity
             if ie_order_quantity < 0:
-                place_order(IE_SYMBOL, abs(ie_order_quantity), ie_price, IE_PRICE_ADJUST, "SELL")
+                logger.info(f"Placing sell market order, symbol={SYMBOL}, quantity={abs(order_quantity)}")
+                place_sell_market_order(IE_SYMBOL, abs(ie_order_quantity))
+                logger.info("Order placed")
 
             # place buy order for equity
             if order_quantity > 0:
