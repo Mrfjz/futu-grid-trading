@@ -19,10 +19,9 @@ FORMATTER = logging.Formatter(
     '%d %b %Y %H:%M:%S')
 
 SYMBOL = "HK.07226"
-PRICE_ADJUST = 0.02
+PRICE_ADJUST_LIMIT = 0.02
 # IE = INVERSE_EQUITY
 IE_SYMBOL = "HK.07552"
-IE_PRICE_ADJUST = 0.05
 
 DRY_RUN = os.environ.get("DRY_RUN", 'False').lower() == 'true'
 
@@ -66,7 +65,7 @@ def wait_order_filled_all(order_id, timeout=30):
         raise TimeoutError(f"Order '{order_id}' is not filled all after {timeout} seconds")
 
 
-def place_order(symbol, quantity, price, price_adjust, trade_side):
+def place_order(symbol, quantity, price, trade_side):
     """
     Place order with different trade side
 
@@ -76,30 +75,21 @@ def place_order(symbol, quantity, price, price_adjust, trade_side):
     :type quantity: int
     :param price: current market price
     :type price: float
-    :param price_adjust: the actual order place will be adjusted (increase for BUY order and decrease for SELL order)
-        so the orders can be filled.
-    :type price_adjust: float
     :param trade_side: ['BUY', 'SELL']
     :type trade_side: str
     :return:
     :rtype:
     """
-    if trade_side == "BUY":
-        price_after_adjust = price + price_adjust
-    elif trade_side == "SELL":
-        price_after_adjust = price - price_adjust
-    else:
-        raise ValueError(f"Expect trade_side to be ['BUY', 'SELL'] but got '{trade_side}'")
-
-    logger.info(f"Placing {trade_side} order, symbol={symbol}, quantity={quantity}, price={price_after_adjust}")
+    logger.info(f"Placing {trade_side} order, symbol={symbol}, quantity={quantity}, price={price}, "
+                f"adjust_limit={PRICE_ADJUST_LIMIT}")
 
     if DRY_RUN:
         logger.debug("Dry run is on, do not process")
     else:
         if trade_side == "BUY":
-            order_id = place_buy_normal_order(symbol, quantity, price_after_adjust)
+            order_id = place_buy_normal_order(symbol, quantity, price, PRICE_ADJUST_LIMIT)
         elif trade_side == "SELL":
-            order_id = place_sell_normal_order(symbol, quantity, price_after_adjust)
+            order_id = place_sell_normal_order(symbol, quantity, price, -PRICE_ADJUST_LIMIT)
         else:
             raise ValueError(f"Expect trade_side to be ['BUY', 'SELL'] but got '{trade_side}'")
 
@@ -152,11 +142,11 @@ def main(args):
 
             # place buy order for equity
             if order_quantity > 0:
-                place_order(SYMBOL, abs(order_quantity), price, PRICE_ADJUST, "BUY")
+                place_order(SYMBOL, abs(order_quantity), price, "BUY")
 
             # place buy order for inverse equity
             if ie_order_quantity > 0:
-                place_order(IE_SYMBOL, abs(ie_order_quantity), ie_price, IE_PRICE_ADJUST, "BUY")
+                place_order(IE_SYMBOL, abs(ie_order_quantity), ie_price, "BUY")
 
         else:
             logger.debug("Market is not open")

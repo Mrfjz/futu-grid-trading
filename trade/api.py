@@ -109,7 +109,7 @@ def place_sell_market_order(symbol, quantity):
         raise ValueError("Unable to place sell market order, error={}".format(data))
 
 
-def place_buy_normal_order(symbol, quantity, price):
+def place_buy_normal_order(symbol, quantity, price, adjust_limit=0):
     """
     Place a buy market order
 
@@ -119,19 +119,22 @@ def place_buy_normal_order(symbol, quantity, price):
     :type quantity: int
     :param price: the order price
     :type price: float
+    :param adjust_limit: Price adjustment range
+    :type adjust_limit: float
     :return: order id
     :rtype: str
     """
+    assert adjust_limit >= 0
     assert quantity > 0, "Expect quantity to be a positive integer but got {}".format(quantity)
     ret, data = trd_ctx.place_order(price=price, qty=quantity, code=symbol, trd_side=TrdSide.BUY,
-                                    order_type=OrderType.NORMAL)
+                                    order_type=OrderType.NORMAL, adjust_limit=adjust_limit)
     if ret == RET_OK:
         return data['order_id'][0]
     else:
         raise ValueError("Unable to place buy normal order, error={}".format(data))
 
 
-def place_sell_normal_order(symbol, quantity, price):
+def place_sell_normal_order(symbol, quantity, price, adjust_limit=0):
     """
     Place a sell market order
 
@@ -141,12 +144,15 @@ def place_sell_normal_order(symbol, quantity, price):
     :type quantity: int
     :param price: the order price
     :type price: float
+    :param adjust_limit: Price adjustment range
+    :type adjust_limit: float
     :return: order id
     :rtype: str
     """
+    assert adjust_limit <= 0
     assert quantity > 0, "Expect quantity to be a positive integer but got {}".format(quantity)
     ret, data = trd_ctx.place_order(price=price, qty=quantity, code=symbol, trd_side=TrdSide.SELL,
-                                    order_type=OrderType.NORMAL)
+                                    order_type=OrderType.NORMAL, adjust_limit=adjust_limit)
     if ret == RET_OK:
         return data['order_id'][0]
     else:
