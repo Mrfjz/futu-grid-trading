@@ -97,6 +97,35 @@ def place_order(symbol, quantity, price, trade_side):
         wait_order_filled_all(order_id)
 
 
+def place_market_order(symbol, quantity, trade_side):
+    """
+    Place order with different trade side
+
+    :param symbol: a single stock stick, e.g. 'HK.07266'
+    :type symbol: str
+    :param quantity: order quantity
+    :type quantity: int
+    :param trade_side: ['BUY', 'SELL']
+    :type trade_side: str
+    :return:
+    :rtype:
+    """
+    assert quantity > 0
+    logger.info(f"Placing {trade_side} order, symbol={symbol}, quantity={quantity}")
+
+    if DRY_RUN:
+        logger.debug("Dry run is on, do not process")
+    else:
+        if trade_side == "BUY":
+            place_buy_market_order(symbol, quantity)
+        elif trade_side == "SELL":
+            place_sell_market_order(symbol, quantity)
+        else:
+            raise ValueError(f"Expect trade_side to be ['BUY', 'SELL'] but got '{trade_side}'")
+
+        logger.info(f"Order placed")
+
+
 def main(args):
     with open(args['config']) as f:
         config = yaml.safe_load(f)
@@ -124,29 +153,19 @@ def main(args):
 
             # place sell order for equity
             if order_quantity < 0:
-                logger.info(f"Placing sell market order, symbol={SYMBOL}, quantity={abs(order_quantity)}")
-                if DRY_RUN:
-                    logger.debug("Dry run is on, do not process")
-                else:
-                    place_sell_market_order(SYMBOL, abs(order_quantity))
-                    logger.info("Order placed")
+                place_market_order(SYMBOL, abs(order_quantity), "SELL")
 
             # place sell order for inverse equity
             if ie_order_quantity < 0:
-                logger.info(f"Placing sell market order, symbol={SYMBOL}, quantity={abs(order_quantity)}")
-                if DRY_RUN:
-                    logger.debug("Dry run is on, do not process")
-                else:
-                    place_sell_market_order(IE_SYMBOL, abs(ie_order_quantity))
-                    logger.info("Order placed")
+                place_market_order(IE_SYMBOL, abs(ie_order_quantity), "SELL")
 
             # place buy order for equity
             if order_quantity > 0:
-                place_order(SYMBOL, abs(order_quantity), price, "BUY")
+                place_market_order(SYMBOL, abs(order_quantity), "BUY")
 
             # place buy order for inverse equity
             if ie_order_quantity > 0:
-                place_order(IE_SYMBOL, abs(ie_order_quantity), ie_price, "BUY")
+                place_market_order(IE_SYMBOL, abs(ie_order_quantity), "BUY")
 
         else:
             logger.debug("Market is not open")
