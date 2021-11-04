@@ -128,15 +128,18 @@ def main(args):
     with open(args['config']) as f:
         config = yaml.safe_load(f)
 
-    symbol = config['symbol']
+    symbol = str(config['symbol'])
     # inverse equity
-    ie_symbol = config['ie_symbol']
+    ie_symbol = str(config['ie_symbol'])
+
+    lot_size = get_lot_size(symbol)
+    ie_lot_size = get_lot_size(ie_symbol)
 
     configure_logger()
-    strategy = GridTradingStrategy(**config['grid_trading_strategy'])
+    strategy = GridTradingStrategy(**config['grid_trading_strategy'], lot_size=lot_size, ie_lot_size=ie_lot_size)
     logger.info("Futu-grid-trading started")
 
-    try:    
+    try:
         while 1:
             if is_market_open():
                 _, price = get_latest_price(symbol)
@@ -146,7 +149,7 @@ def main(args):
                 ie_position = get_position(ie_symbol)
 
                 logger.debug(f"price={price}, position={position}, "
-                            f"ie_price={ie_price}, ie_position={ie_position}, ")
+                             f"ie_price={ie_price}, ie_position={ie_position}, ")
 
                 order_quantity, ie_order_quantity = strategy.cal_order_quantity(price, position, ie_position)
 
@@ -175,6 +178,7 @@ def main(args):
     except:
         logger.error(traceback.format_exc())
         raise
+
 
 if __name__ == "__main__":
     main(get_args())

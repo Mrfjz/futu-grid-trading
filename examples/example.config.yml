@@ -5,4 +5,4 @@ grid_trading_strategy:
   grid_lower_limit_price: 3.6
   grid_count: 10
   grid_lower_limit_position: 10000
-  inverse_equity_max_position: 10000
+  ie_max_position: 10000

@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 
-from futu import SysConfig, OpenHKTradeContext, RET_OK, TrdSide, OrderType, OpenQuoteContext
+from futu import SysConfig, OpenHKTradeContext, RET_OK, TrdSide, OrderType, OpenQuoteContext, Market
 
 SysConfig.set_all_thread_daemon(True)
 
@@ -9,6 +9,24 @@ trd_ctx = OpenHKTradeContext(host='127.0.0.1', port=11111)
 quote_ctx = OpenQuoteContext(host='127.0.0.1', port=11111)  # Create quote object
 
 trd_ctx.unlock_trade(os.environ['PWD_UNLOCK'])
+
+
+def get_lot_size(symbol):
+    """
+    Get lot size of a given symbol
+
+    :param symbol: a single stock stick, e.g. 'HK.07266'
+    :type symbol: str
+    :return: lot size
+    :rtype: int
+    """
+    ret, data = quote_ctx.get_stock_basicinfo(Market.HK, code_list=[symbol])
+    if ret == RET_OK:
+        lot_size = int(data['lot_size'][0])
+    else:
+        raise ValueError("Unable to get data of {}, error={}".format(symbol, data))
+
+    return lot_size
 
 
 def get_latest_price(symbol):
