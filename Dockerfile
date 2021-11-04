@@ -9,9 +9,10 @@ RUN apt-get update \
   && pip3 --no-cache-dir install --upgrade pip \
   && rm -rf /var/lib/apt/lists/*
 
-RUN pip3 install futu-api
-RUN pip3 install pyyaml
+RUN pip3 install futu-api pyyaml
 
-COPY . /opt/futu-grid-trading
+COPY ./main.py /opt/futu-grid-trading/main.py
+COPY ./trade /opt/futu-grid-trading/trade
+COPY ./scripts /opt/futu-grid-trading/scripts
 
 WORKDIR /opt/futu-grid-trading
