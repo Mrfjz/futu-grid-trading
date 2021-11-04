@@ -4,6 +4,7 @@ import logging
 from logging.handlers import TimedRotatingFileHandler
 import argparse
 import re
+import traceback
 from time import sleep
 
 import yaml
@@ -18,12 +19,9 @@ FORMATTER = logging.Formatter(
     '%(asctime)s.%(msecs)03d %(name)s %(levelname)s %(filename)s:%(lineno)d %(funcName)s(): %(message)s',
     '%d %b %Y %H:%M:%S')
 
-SYMBOL = "HK.07226"
 PRICE_ADJUST_LIMIT = 0.02
-# IE = INVERSE_EQUITY
-IE_SYMBOL = "HK.07552"
 
-DRY_RUN = os.environ.get("DRY_RUN", 'False').lower() == 'true'
+DRY_RUN = os.environ["DRY_RUN"].lower() == 'true'
 
 
 def get_args():
@@ -114,7 +112,7 @@ def place_market_order(symbol, quantity, trade_side):
     logger.info(f"Placing {trade_side} order, symbol={symbol}, quantity={quantity}")
 
     if DRY_RUN:
-        logger.debug("Dry run is on, do not process")
+        logger.debug("Dry run is on, order not being placed")
     else:
         if trade_side == "BUY":
             place_buy_market_order(symbol, quantity)
@@ -130,48 +128,53 @@ def main(args):
     with open(args['config']) as f:
         config = yaml.safe_load(f)
 
+    symbol = config['symbol']
+    # inverse equity
+    ie_symbol = config['ie_symbol']
+
     configure_logger()
     strategy = GridTradingStrategy(**config['grid_trading_strategy'])
     logger.info("Futu-grid-trading started")
 
-    while 1:
-        if check_market_open():
-            assert check_all_submitted_order_filled_all(), "Not all submitted order is filled all!"
+    try:    
+        while 1:
+            if is_market_open():
+                _, price = get_latest_price(symbol)
+                position = get_position(symbol)
+                # ie = inverse equity
+                _, ie_price = get_latest_price(ie_symbol)
+                ie_position = get_position(ie_symbol)
 
-            _, price = get_latest_price(SYMBOL)
-            position = get_position(SYMBOL)
-            # ie = inverse equity
-            _, ie_price = get_latest_price(IE_SYMBOL)
-            ie_position = get_position(IE_SYMBOL)
+                logger.debug(f"price={price}, position={position}, "
+                            f"ie_price={ie_price}, ie_position={ie_position}, ")
 
-            logger.debug(f"price={price}, position={position}, "
-                         f"ie_price={ie_price}, ie_position={ie_position}, ")
+                order_quantity, ie_order_quantity = strategy.cal_order_quantity(price, position, ie_position)
 
-            order_quantity, ie_order_quantity = strategy.cal_order_quantity(price, position, ie_position)
+                logger.debug(f"order_quantity={order_quantity}, ie_order_quantity={ie_order_quantity}")
 
-            logger.debug(f"order_quantity={order_quantity}, ie_order_quantity={ie_order_quantity}")
+                # place sell order for equity
+                if order_quantity < 0:
+                    place_market_order(symbol, abs(order_quantity), "SELL")
 
-            # place sell order for equity
-            if order_quantity < 0:
-                place_market_order(SYMBOL, abs(order_quantity), "SELL")
+                # place sell order for inverse equity
+                if ie_order_quantity < 0:
+                    place_market_order(ie_symbol, abs(ie_order_quantity), "SELL")
 
-            # place sell order for inverse equity
-            if ie_order_quantity < 0:
-                place_market_order(IE_SYMBOL, abs(ie_order_quantity), "SELL")
+                # place buy order for equity
+                if order_quantity > 0:
+                    place_market_order(symbol, abs(order_quantity), "BUY")
 
-            # place buy order for equity
-            if order_quantity > 0:
-                place_market_order(SYMBOL, abs(order_quantity), "BUY")
+                # place buy order for inverse equity
+                if ie_order_quantity > 0:
+                    place_market_order(ie_symbol, abs(ie_order_quantity), "BUY")
 
-            # place buy order for inverse equity
-            if ie_order_quantity > 0:
-                place_market_order(IE_SYMBOL, abs(ie_order_quantity), "BUY")
+            else:
+                logger.debug("Market is not open")
 
-        else:
-            logger.debug("Market is not open")
-
-        sleep(10)
-
+            sleep(10)
+    except:
+        logger.error(traceback.format_exc())
+        raise
 
 if __name__ == "__main__":
     main(get_args())

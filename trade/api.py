@@ -33,7 +33,7 @@ def get_latest_price(symbol):
     return update_time, price
 
 
-def check_market_open():
+def is_market_open():
     """
     Check if Hong Kong market is open
 

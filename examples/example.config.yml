@@ -1,3 +1,5 @@
+symbol: "HK.07226"
+ie_symbol: "HK.07552"
 grid_trading_strategy:
   grid_upper_limit_price: 5.6
   grid_lower_limit_price: 3.6
