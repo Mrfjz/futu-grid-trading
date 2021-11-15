@@ -94,7 +94,7 @@ class GridTradingStrategy:
                      f"max_grid_position={max_grid_position}, new_position={new_position}, "
                      f"order_quantity={order_quantity}")
 
-        ie_grid_index = (self.grid_count - new_position / self.position_per_grid)
+        ie_grid_index = round(self.grid_count - new_position / self.position_per_grid)
         ie_new_position = ie_grid_index * self.ie_position_per_grid
         ie_order_quantity = int(ie_new_position - ie_position)
 
