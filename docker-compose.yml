@@ -8,10 +8,7 @@ services:
     deploy:
       restart_policy:
         condition: on-failure
-        delay: 30s
-        max_attempts: 3
-        window: 120s
-    environment: 
+    environment:
       - PWD_UNLOCK=$PWD_UNLOCK
       - LOG_LEVEL=$LOG_LEVEL
       - DRY_RUN=$DRY_RUN
