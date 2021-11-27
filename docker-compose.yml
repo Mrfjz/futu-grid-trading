@@ -5,6 +5,12 @@ services:
     build: .
     network_mode: "host"
     container_name: futu-grid-trading
+    deploy:
+      restart_policy:
+        condition: on-failure
+        delay: 30s
+        max_attempts: 3
+        window: 120s
     environment: 
       - PWD_UNLOCK=$PWD_UNLOCK
       - LOG_LEVEL=$LOG_LEVEL
