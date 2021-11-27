@@ -51,6 +51,8 @@ class GridTradingStrategy:
                      f"grid_lower_limit_position={grid_lower_limit_position}, ie_max_position={ie_max_position}, "
                      f"position_per_grid={self.position_per_grid}, ie_position_per_grid={self.ie_position_per_grid}")
 
+        logger.info(f"grids={self.grids}")
+
     def cal_grid_index_by_price(self, price):
         """
         calculate which grid the price falls in
